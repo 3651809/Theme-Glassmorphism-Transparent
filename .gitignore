@@ -1,0 +1,7 @@
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+.DS_Store
+CLAUDE.md
+.claude/launch.json
