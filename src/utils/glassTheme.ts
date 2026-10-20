@@ -113,8 +113,11 @@ export interface GlassTransparentTokens {
 }
 
 /**
- * 透明模式卡片 token。用深色烟熏玻璃而非白色蒙版：
- * 照片背景明暗不可控，深色底 + 白字在任何背景上都更容易读。
+ * 透明模式卡片 token。目标是「整图不变、卡片全透」：
+ * 不压暗、不模糊、不叠色，背景图按原样显示，卡片只剩一层描边和文字投影。
+ *
+ * 因此色相层直接用 opacity 当 alpha，默认 0 就是完全透明。
+ * 需要一点底时才靠这个值加，不要在别处补固定色块。
  * cardStrong 供不支持 backdrop-filter 的浏览器（Firefox / 旧版 WebKit）使用。
  */
 export function buildTransparentTokens(opacityPercent: number): GlassTransparentTokens {
@@ -124,13 +127,14 @@ export function buildTransparentTokens(opacityPercent: number): GlassTransparent
   return {
     card: tint(opacity),
     cardHover: tint(opacity + 0.06),
-    cardStrong: tint(opacity + 0.3),
-    control: tint(opacity + 0.04),
-    header: tint(opacity + 0.06),
+    cardStrong: tint(Math.min(opacity + 0.4, 0.95)),
+    // 顶栏与统计栏是贴边控件，全透会让滚动内容直接穿过文字，留一档极淡的底
+    control: tint(opacity + 0.08),
+    header: tint(opacity + 0.08),
     text: '#ffffff',
     mutedText: 'rgb(255 255 255 / 0.82)',
-    border: 'rgb(255 255 255 / 0.18)',
-    shadow: '0 10px 30px rgb(0 0 0 / 0.28)',
+    border: 'rgb(255 255 255 / 0.16)',
+    shadow: '0 8px 24px rgb(0 0 0 / 0.18)',
   }
 }
 

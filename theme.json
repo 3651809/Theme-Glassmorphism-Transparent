@@ -2,7 +2,7 @@
   "name": "Glassmorphism Transparent · 玻璃拟态透明",
   "short": "glassmorphism-transparent",
   "description": "极简探针玻璃拟态主题的透明模式版本：卡片半透明，背景图成为页面主视觉。",
-  "version": "1.5.0",
+  "version": "1.6.3",
   "author": "Gongsc",
   "url": "https://github.com/Gongsc/Theme-Glassmorphism",
   "config": [
@@ -26,13 +26,9 @@
         {
           "value": "dark",
           "label": "dark"
-        },
-        {
-          "value": "transparent",
-          "label": "transparent"
         }
       ],
-      "help": "beijing=北京时间自动； light=亮色； dark=暗色； transparent=透明模式（卡片半透明，突出背景图）。",
+      "help": "beijing=北京时间自动（7:00-19:00 亮色，其余暗色）； light=固定亮色； dark=固定暗色。透明模式由访客用页面顶部按钮自行切换，不作为站点默认——否则所有停留在「自动」的访问（包括白天）都会变成透明。",
       "label": "默认主题模式"
     },
     {
@@ -631,8 +627,8 @@
     {
       "key": "transparentBackgroundOverlay",
       "type": "number",
-      "default": 10,
-      "help": "透明模式下背景遮罩强度（-100 到 100）；默认 10 略压暗背景以提升文字可读性，背景偏暗时可调低或设 0。",
+      "default": 0,
+      "help": "透明模式下背景遮罩强度（-100 到 100）；0 表示不压暗，背景图最亮。文字对比度不足时可调高到 10-20。",
       "label": "透明模式背景遮罩",
       "min": -100,
       "max": 100
@@ -640,9 +636,18 @@
     {
       "key": "transparentCardOpacity",
       "type": "number",
-      "default": 15,
-      "help": "卡片与顶部栏的底色不透明度（0-100），数值越大越不透明；建议 10-25。",
+      "default": 0,
+      "help": "卡片底色（0-100），0 表示完全透明、背景图原样显示；照片偏亮导致白字看不清时可加到 8-15。",
       "label": "透明模式卡片不透明度",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "transparentCardBlur",
+      "type": "number",
+      "default": 0,
+      "help": "卡片毛玻璃的模糊半径（单位：px），0 表示不模糊、背景图保持清晰；调大可让卡片后的照片柔化。",
+      "label": "透明模式卡片模糊",
       "min": 0,
       "max": 100
     },

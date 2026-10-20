@@ -499,7 +499,7 @@ header {
   }
 }
 
-/* ===== 透明模式：卡片半透明，背景图成为主视觉 ===== */
+/* ===== 透明模式：整图不变，卡片全透 ===== */
 /* 选择器统一带 html 前缀，确保覆盖上面的 .dark / @supports / legacy-webkit 规则。 */
 
 html.transparent {
@@ -515,51 +515,61 @@ html.transparent {
   --muted-foreground: oklch(0.9 0.005 250);
   --accent: rgb(255 255 255 / 0.16);
   --accent-foreground: oklch(0.99 0 0);
-  --border: rgb(255 255 255 / 0.18);
+  --border: rgb(255 255 255 / 0.2);
   --input: rgb(255 255 255 / 0.22);
   background-color: transparent;
 }
 
-html.transparent .default-background {
-  filter: brightness(0.55) saturate(0.95) contrast(1.05);
+/* 透明模式与 dark 同时存在，组件 scoped 样式里的 `.dark .xxx[data-v-*]` 会命中这里，
+   选择器要带上 .dark 才能保持更高优先级。
+   整图不变：透明模式不给背景加任何滤镜，默认背景保持原图的饱和度与亮度。 */
+html.transparent.dark .default-background {
+  filter: saturate(1.12) contrast(1.02);
 }
 
 html.transparent .node-card,
 html.transparent .bg-card,
 html.transparent [data-slot='card'] {
-  background-color: var(--glass-transparent-card, rgb(8 12 22 / 0.15)) !important;
-  border: 1px solid var(--glass-transparent-border, rgb(255 255 255 / 0.18)) !important;
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  box-shadow: var(--glass-transparent-shadow, 0 10px 30px rgb(0 0 0 / 0.28)) !important;
+  background-color: var(--glass-transparent-card, transparent) !important;
+  border: 1px solid var(--glass-transparent-border, rgb(255 255 255 / 0.16)) !important;
+  backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
+  -webkit-backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
+  box-shadow: var(--glass-transparent-shadow, 0 8px 24px rgb(0 0 0 / 0.18)), inset 0 1px 0 rgb(255 255 255 / 0.14) !important;
 }
 
 html.transparent .node-card:hover,
 html.transparent .bg-card:hover,
 html.transparent [data-slot='card']:hover {
-  background-color: var(--glass-transparent-card-hover, rgb(8 12 22 / 0.21)) !important;
+  background-color: var(--glass-transparent-card-hover, rgb(8 12 22 / 0.06)) !important;
 }
 
+/* 顶栏与统计栏沿用同一套参数：默认不模糊、只留一档极淡的底 */
 html.transparent header {
-  background-color: var(--glass-transparent-header, rgb(8 12 22 / 0.21)) !important;
-  border-bottom: 1px solid var(--glass-transparent-border, rgb(255 255 255 / 0.18)) !important;
+  background-color: var(--glass-transparent-header, rgb(8 12 22 / 0.08)) !important;
+  border-bottom: 1px solid var(--glass-transparent-border, rgb(255 255 255 / 0.16)) !important;
+  backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
+  -webkit-backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
 }
 
 html.transparent .bg-background {
-  background-color: var(--glass-transparent-control, rgb(8 12 22 / 0.19)) !important;
+  background-color: var(--glass-transparent-control, rgb(8 12 22 / 0.08)) !important;
+  backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
+  -webkit-backdrop-filter: var(--glass-transparent-card-backdrop, none) !important;
 }
 
-/* Tailwind 的 bg-background/50 等写法会生成独立类名，单独兜一层底色 */
+/* Tailwind 的 bg-background/50 等写法会生成独立类名，单独兜一层底色。
+   这类多是按钮、标签这类小控件，挂了 backdrop-filter 会拖慢长列表，
+   所以用一档固定的淡底保证白字可读，不跟随遮光强度。 */
 html.transparent [class*='bg-background/'] {
-  background-color: var(--glass-transparent-control, rgb(8 12 22 / 0.19)) !important;
+  background-color: rgb(8 12 22 / 0.12) !important;
 }
 
 html.transparent [class*='bg-card/'] {
-  background-color: var(--glass-transparent-card, rgb(8 12 22 / 0.15)) !important;
+  background-color: rgb(8 12 22 / 0.1) !important;
 }
 
 html.transparent .bg-slate-500\/5 {
-  background-color: rgb(255 255 255 / 0.12) !important;
+  background-color: rgb(255 255 255 / 0.1) !important;
 }
 
 html.transparent .visitor-compact-bar,
@@ -624,7 +634,7 @@ html.transparent .bg-background,
 html.transparent footer,
 html.transparent .visitor-compact-bar,
 html.transparent .visitor-detail-card {
-  text-shadow: var(--glass-transparent-text-shadow, 0 1px 3px rgb(0 0 0 / 0.8), 0 0 10px rgb(0 0 0 / 0.45));
+  text-shadow: var(--glass-transparent-text-shadow, 0 1px 2px rgb(0 0 0 / 0.9), 0 0 14px rgb(0 0 0 / 0.55), 0 0 28px rgb(0 0 0 / 0.28));
 }
 
 /* 弹窗与设置面板：保持较高不透明度，避免透明到看不清表单 */
@@ -647,7 +657,7 @@ html.transparent .monitor-settings textarea {
   html.transparent .node-card,
   html.transparent .bg-card,
   html.transparent [data-slot='card'] {
-    background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.45)) !important;
+    background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.4)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -655,13 +665,7 @@ html.transparent .monitor-settings textarea {
   html.transparent .node-card:hover,
   html.transparent .bg-card:hover,
   html.transparent [data-slot='card']:hover {
-    background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.45)) !important;
-  }
-
-  html.transparent header,
-  html.transparent .bg-background {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.4)) !important;
   }
 }
 
@@ -674,7 +678,7 @@ html.legacy-webkit.transparent {
   --popover: #0a0e18;
   --popover-foreground: #fafafa;
   --muted-foreground: #e5e7eb;
-  --border: rgb(255 255 255 / 0.18);
+  --border: rgb(255 255 255 / 0.2);
   --input: rgb(255 255 255 / 0.22);
   background-color: transparent;
 }
@@ -682,7 +686,7 @@ html.legacy-webkit.transparent {
 html.legacy-webkit.transparent .node-card,
 html.legacy-webkit.transparent .bg-card,
 html.legacy-webkit.transparent [data-slot='card'] {
-  background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.45)) !important;
+  background-color: var(--glass-transparent-card-strong, rgb(8 12 22 / 0.4)) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }

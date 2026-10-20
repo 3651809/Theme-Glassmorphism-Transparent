@@ -27,15 +27,14 @@ const actionButtons = computed(() => {
   const themeTitleMap = {
     auto: appStore.managedThemeMode === 'beijing'
       ? appStore.isBeijingDaytime ? '自动主题：北京时间日间' : '自动主题：北京时间夜间'
-      : appStore.managedThemeMode === 'light' ? '自动主题：后台浅色'
-        : appStore.managedThemeMode === 'transparent' ? '自动主题：后台透明' : '自动主题：后台深色',
+      : appStore.managedThemeMode === 'light' ? '自动主题：后台浅色' : '自动主题：后台深色',
     light: '浅色主题',
     dark: '深色主题',
     transparent: '透明主题：突出背景',
   } as const
 
   const themeIconMap = {
-    auto: appStore.isTransparent ? 'tabler:photo' : appStore.isDark ? 'icon-park-outline:moon' : 'icon-park-outline:sun-one',
+    auto: appStore.isDark ? 'icon-park-outline:moon' : 'icon-park-outline:sun-one',
     light: 'icon-park-outline:sun-one',
     dark: 'icon-park-outline:moon',
     transparent: 'tabler:photo',

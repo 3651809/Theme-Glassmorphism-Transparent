@@ -56,7 +56,7 @@
             isDark = Number.isFinite(hour) ? hour < 7 || hour >= 19 : true
           }
 
-          root.classList.toggle('dark', isDark)
+          root.classList.toggle('dark', isDark || isTransparent)
           root.classList.toggle('transparent', isTransparent)
           root.style.colorScheme = isDark || isTransparent ? 'dark' : 'light'
         } catch (error) {

@@ -9,7 +9,7 @@ import { safeStorage } from '@/monitor/storage'
 import { getAuthSession, requirePermission, setAuthSessionFromLogin, verifyLogin } from '@/services/auth.service'
 
 export type ThemeMode = 'auto' | 'light' | 'dark' | 'transparent'
-export type ManagedThemeMode = 'beijing' | 'light' | 'dark' | 'transparent'
+export type ManagedThemeMode = 'beijing' | 'light' | 'dark'
 export type GeneralCardKey
   = | 'currentTime'
     | 'memory'
@@ -504,7 +504,7 @@ function isValidThemeMode(value: unknown): value is ThemeMode {
 }
 
 function isValidManagedThemeMode(value: unknown): value is ManagedThemeMode {
-  return value === 'beijing' || value === 'light' || value === 'dark' || value === 'transparent'
+  return value === 'beijing' || value === 'light' || value === 'dark'
 }
 
 function getBeijingHour(timestamp: number): number {
@@ -1123,9 +1123,11 @@ const useAppStore = defineStore('app', () => {
 
   const transparentBackgroundBlur = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentBackgroundBlur', 0, 0, 100))
 
-  const transparentBackgroundOverlay = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentBackgroundOverlay', 10, -100, 100))
+  const transparentBackgroundOverlay = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentBackgroundOverlay', 0, -100, 100))
 
-  const transparentCardOpacity = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentCardOpacity', 15, 0, 100))
+  const transparentCardOpacity = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentCardOpacity', 0, 0, 100))
+
+  const transparentCardBlur = computed<number>(() => readNumberSetting(themeSettings.value, 'transparentCardBlur', 0, 0, 100))
 
   const transparentHideEarth = computed<boolean>(() => readBooleanSetting(themeSettings.value, 'transparentHideEarth', true))
 
@@ -1159,28 +1161,33 @@ const useAppStore = defineStore('app', () => {
     return hour >= 7 && hour < 19
   })
 
-  // 解析当前实际生效的主题模式。本机按钮选择 auto 时跟随后台托管设置，其余值仅覆盖当前浏览器。
-  const resolvedThemeMode = computed<'light' | 'dark' | 'transparent'>(() => {
+  // 透明模式只能由本机按钮显式选择，不参与「自动」的昼夜解析。
+  // 一旦允许后台托管值参与解析，把默认模式设成透明后，所有停留在「自动」的访问
+  // （包括白天）都会变成透明，浅色/深色看起来就像被改坏了。
+  const isTransparent = computed<boolean>(() => isValidThemeMode(themeMode.value) && themeMode.value === 'transparent')
+
+  // 计算当前是否为暗色模式。本机按钮选择 auto 时跟随后台托管设置；手动选择浅色/深色时仅覆盖当前浏览器。
+  const isDark = computed(() => {
     const localMode = isValidThemeMode(themeMode.value) ? themeMode.value : 'auto'
-    if (localMode === 'transparent')
-      return 'transparent'
     if (localMode === 'light')
-      return 'light'
+      return false
     if (localMode === 'dark')
-      return 'dark'
+      return true
+    // 透明模式按深色处理：图表、地球与原生控件沿用深色方案，避免照片背景上出现黑字。
+    if (localMode === 'transparent')
+      return true
 
-    if (managedThemeMode.value === 'transparent')
-      return 'transparent'
     if (managedThemeMode.value === 'beijing')
-      return isBeijingDaytime.value ? 'light' : 'dark'
+      return !isBeijingDaytime.value
 
-    return managedThemeMode.value === 'dark' ? 'dark' : 'light'
+    return managedThemeMode.value === 'dark'
   })
 
-  const isTransparent = computed<boolean>(() => resolvedThemeMode.value === 'transparent')
-
-  // 透明模式按深色处理：图表、地球与原生控件沿用深色方案，避免照片背景上出现黑字。
-  const isDark = computed<boolean>(() => resolvedThemeMode.value !== 'light')
+  const resolvedThemeMode = computed<'light' | 'dark' | 'transparent'>(() => {
+    if (isTransparent.value)
+      return 'transparent'
+    return isDark.value ? 'dark' : 'light'
+  })
 
   const earthHidden = computed<boolean>(() => hideEarth.value || (isTransparent.value && transparentHideEarth.value))
 
@@ -1309,6 +1316,7 @@ const useAppStore = defineStore('app', () => {
     effectiveBackgroundBlur,
     effectiveBackgroundOverlay,
     transparentCardOpacity,
+    transparentCardBlur,
     transparentTextShadow,
     isLoggedIn,
     authStatus,
